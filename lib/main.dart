@@ -142,6 +142,23 @@ class ProfileScreen extends StatelessWidget {
     }
   }
 
+  void _changePassword(BuildContext context, String email) async {
+    try {
+      await auth.sendPasswordResetEmail(email: email);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Password reset email sent to $email')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     User? user = auth.currentUser;
@@ -153,6 +170,16 @@ class ProfileScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('Logged in as: ${user?.email ?? 'No email'}'),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                if (user?.email != null) {
+                  _changePassword(context, user!.email!);
+                }
+              },
+              child: Text('Change Password'),
+            ),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () => _signOut(context),
               child: Text('Logout'),
