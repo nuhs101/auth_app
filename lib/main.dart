@@ -77,12 +77,14 @@ class _RegisterSignInWidgetState extends State<RegisterSignInWidget> {
         userEmail = _emailController.text;
       });
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProfileScreen(auth: widget.auth),
-        ),
-      );
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProfileScreen(auth: widget.auth),
+          ),
+        );
+      }
     } catch (e) {
       setState(() {
         isSuccess = false;
@@ -121,6 +123,43 @@ class _RegisterSignInWidgetState extends State<RegisterSignInWidget> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class ProfileScreen extends StatelessWidget {
+  final FirebaseAuth auth;
+
+  const ProfileScreen({super.key, required this.auth});
+
+  void _signOut(BuildContext context) async {
+    await auth.signOut();
+    if (context.mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => AuthenticationScreen()),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    User? user = auth.currentUser;
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Profile Screen')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Logged in as: ${user?.email ?? 'No email'}'),
+            ElevatedButton(
+              onPressed: () => _signOut(context),
+              child: Text('Logout'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
